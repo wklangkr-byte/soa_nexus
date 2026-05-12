@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOA NEXUS — Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Sarabun:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #020810;
+    --surface: #060f1e;
+    --surface2: #0a1628;
+    --border: rgba(0,200,255,0.15);
+    --accent: #00c8ff;
+    --accent2: #00ff9d;
+    --accent3: #ff6b35;
+    --text: #e0f4ff;
+    --muted: #4a7a99;
+    --glow: 0 0 20px rgba(0,200,255,0.3);
+    --glow2: 0 0 20px rgba(0,255,157,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ANIMATED BACKGROUND */
+  .bg-grid {
+    position: fixed; inset: 0; z-index: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridMove 20s linear infinite;
+  }
+  @keyframes gridMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 40px 40px; }
+  }
+
+  .bg-orbs {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  }
+  .orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(80px); opacity: 0.12; animation: orbFloat 8s ease-in-out infinite;
+  }
+  .orb1 { width: 400px; height: 400px; background: var(--accent); top: -100px; left: -100px; animation-delay: 0s; }
+  .orb2 { width: 300px; height: 300px; background: var(--accent2); bottom: -80px; right: -80px; animation-delay: 3s; }
+  .orb3 { width: 250px; height: 250px; background: var(--accent3); top: 50%; left: 50%; animation-delay: 5s; }
+  @keyframes orbFloat {
+    0%,100% { transform: translate(0,0) scale(1); }
+    50% { transform: translate(30px,-20px) scale(1.1); }
+  }
+
+  /* SCAN LINE */
+  .scanline {
+    position: fixed; top: -2px; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    z-index: 9999; animation: scan 4s linear infinite; opacity: 0.4;
+  }
+  @keyframes scan {
+    0% { top: -3px; } 100% { top: 100vh; }
+  }
+
+  /* ===== LOGIN SCREEN ===== */
+  #login-screen {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+
+  .login-card {
+    position: relative; z-index: 1;
+    background: linear-gradient(145deg, rgba(6,15,30,0.95), rgba(10,22,40,0.95));
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 100%; max-width: 420px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 60px rgba(0,200,255,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+    animation: cardIn 0.6s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(30px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .login-card::before {
+    content: ''; position: absolute; inset: -1px;
+    border-radius: 21px;
+    background: linear-gradient(135deg, var(--accent), transparent, var(--accent2));
+    z-index: -1; opacity: 0.3;
+  }
+
+  .login-logo {
+    text-align: center; margin-bottom: 32px;
+  }
+  .logo-icon {
+    width: 64px; height: 64px; margin: 0 auto 16px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; box-shadow: var(--glow);
+    animation: logoPulse 3s ease-in-out infinite;
+  }
+  @keyframes logoPulse {
+    0%,100% { box-shadow: 0 0 20px rgba(0,200,255,0.3); }
+    50% { box-shadow: 0 0 40px rgba(0,200,255,0.6), 0 0 60px rgba(0,255,157,0.2); }
+  }
+  .login-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 22px; font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 3px;
+  }
+  .login-sub {
+    font-size: 12px; color: var(--muted); margin-top: 4px;
+    font-family: 'Share Tech Mono', monospace; letter-spacing: 1px;
+  }
+
+  .field-group { margin-bottom: 20px; }
+  .field-label {
+    font-size: 11px; font-family: 'Share Tech Mono', monospace;
+    color: var(--accent); letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 8px; display: block;
+  }
+  .field-wrap {
+    position: relative;
+  }
+  .field-icon {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--muted); font-size: 16px; pointer-events: none;
+  }
+  .login-input {
+    width: 100%;
+    background: rgba(0,200,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 14px 13px 42px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s;
+  }
+  .login-input:focus {
+    border-color: var(--accent);
+    background: rgba(0,200,255,0.08);
+    box-shadow: 0 0 0 3px rgba(0,200,255,0.1);
+  }
+  .login-input::placeholder { color: rgba(74,122,153,0.6); }
+
+  .error-msg {
+    display: none; margin-top: 8px;
+    font-size: 12px; color: #ff4d6d;
+    font-family: 'Share Tech Mono', monospace;
+    padding: 8px 12px;
+    background: rgba(255,77,109,0.1);
+    border: 1px solid rgba(255,77,109,0.3);
+    border-radius: 6px;
+  }
+  .error-msg.show { display: block; animation: shake 0.3s ease; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .login-btn {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg, var(--accent), #0066cc);
+    border: none; border-radius: 10px;
+    color: #000; font-family: 'Orbitron', monospace;
+    font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    cursor: pointer; margin-top: 8px;
+    transition: all 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,200,255,0.4);
+  }
+  .login-btn:active { transform: translateY(0); }
+  .login-btn::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2), transparent);
+    transform: translateX(-100%); transition: transform 0.5s;
+  }
+  .login-btn:hover::after { transform: translateX(100%); }
+
+  .login-hint {
+    margin-top: 24px; padding-top: 20px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 11px; color: var(--muted);
+    font-family: 'Share Tech Mono', monospace;
+  }
+  .hint-cred { color: var(--accent2); }
+
+  /* ===== MAIN APP ===== */
+  #app {
+    display: none; position: relative; z-index: 1;
+    min-height: 100vh; flex-direction: column;
+  }
+  #app.active { display: flex; }
+
+  /* TOPBAR */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(2,8,16,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 64px;
+    display: flex; align-items: center; justify-content: space-between;
+    animation: slideDown 0.5s ease both;
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .topbar-brand {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .brand-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .brand-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 16px; font-weight: 900; letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .brand-ver {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; color: var(--muted); letter-spacing: 1px;
+  }
+
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent2);
+    box-shadow: 0 0 8px var(--accent2);
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .user-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(0,200,255,0.08);
+    border: 1px solid var(--border);
+    border-radius: 20px; padding: 6px 14px;
+    font-size: 13px; cursor: pointer;
+    transition: all 0.3s;
+  }
+  .user-chip:hover { border-color: var(--accent); background: rgba(0,200,255,0.12); }
+  .user-avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: #000;
+  }
+
+  .logout-btn {
+    background: none; border: 1px solid rgba(255,77,109,0.3);
+    color: #ff4d6d; border-radius: 8px; padding: 6px 12px;
+    font-size: 12px; cursor: pointer; font-family: 'Share Tech Mono', monospace;
+    transition: all 0.3s; letter-spacing: 1px;
+  }
+  .logout-btn:hover { background: rgba(255,77,109,0.1); border-color: #ff4d6d; }
+
+  /* MAIN CONTENT */
+  .main-content {
+    flex: 1; padding: 32px 24px;
+    max-width: 1280px; margin: 0 auto; width: 100%;
+  }
+
+  .welcome-bar {
+    margin-bottom: 32px; animation: fadeUp 0.6s ease 0.2s both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .welcome-text {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(20px, 4vw, 28px); font-weight: 700;
+    color: var(--text); letter-spacing: 2px;
+  }
+  .welcome-text span { color: var(--accent); }
+  .welcome-sub {
+    font-size: 13px; color: var(--muted); margin-top: 6px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  #clock {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px; color: var(--accent2);
+    margin-top: 4px;
+  }
+
+  /* STATS ROW */
+  .stats-row {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px; margin-bottom: 32px;
+    animation: fadeUp 0.6s ease 0.3s both;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 20px;
+    position: relative; overflow: hidden;
+  }
+  .stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+  .stat-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 28px; font-weight: 900; color: var(--accent);
+  }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* APP GRID */
+  .app-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    animation: fadeUp 0.6s ease 0.4s both;
+  }
+
+  .app-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px;
+    cursor: pointer; text-decoration: none; color: inherit;
+    transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
+    position: relative; overflow: hidden;
+    display: block;
+  }
+  .app-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(0,200,255,0.05), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .app-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,200,255,0.15), var(--glow);
+  }
+  .app-card:hover::before { opacity: 1; }
+
+  .app-card-top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .app-icon-wrap {
+    width: 56px; height: 56px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; position: relative;
+    transition: transform 0.3s;
+  }
+  .app-card:hover .app-icon-wrap { transform: scale(1.1) rotate(-3deg); }
+
+  .app-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+    padding: 4px 8px; border-radius: 4px;
+    border: 1px solid currentColor; opacity: 0.7;
+  }
+
+  .app-name {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px; font-weight: 700; letter-spacing: 1px;
+    margin-bottom: 8px; color: var(--text);
+  }
+  .app-desc {
+    font-size: 13px; color: var(--muted); line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .app-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .app-url {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px; color: var(--muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    max-width: 200px;
+  }
+  .open-arrow {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: rgba(0,200,255,0.1);
+    border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; transition: all 0.3s; flex-shrink: 0;
+  }
+  .app-card:hover .open-arrow {
+    background: var(--accent); color: #000;
+    border-color: var(--accent);
+    transform: rotate(-45deg);
+  }
+
+  /* THEME COLORS PER CARD */
+  .theme-cyan .app-icon-wrap { background: rgba(0,200,255,0.1); border: 1px solid rgba(0,200,255,0.2); }
+  .theme-green .app-icon-wrap { background: rgba(0,255,157,0.1); border: 1px solid rgba(0,255,157,0.2); }
+  .theme-orange .app-icon-wrap { background: rgba(255,107,53,0.1); border: 1px solid rgba(255,107,53,0.2); }
+  .theme-purple .app-icon-wrap { background: rgba(180,100,255,0.1); border: 1px solid rgba(180,100,255,0.2); }
+  .theme-gold .app-icon-wrap { background: rgba(255,200,50,0.1); border: 1px solid rgba(255,200,50,0.2); }
+  .theme-pink .app-icon-wrap { background: rgba(255,100,150,0.1); border: 1px solid rgba(255,100,150,0.2); }
+  .theme-teal .app-icon-wrap { background: rgba(0,200,180,0.1); border: 1px solid rgba(0,200,180,0.2); }
+  .theme-sky .app-icon-wrap { background: rgba(100,180,255,0.1); border: 1px solid rgba(100,180,255,0.2); }
+  .theme-red .app-icon-wrap { background: rgba(255,80,80,0.1); border: 1px solid rgba(255,80,80,0.2); }
+
+  .theme-cyan .app-badge,.theme-cyan .app-name { color: #00c8ff; }
+  .theme-green .app-badge,.theme-green .app-name { color: #00ff9d; }
+  .theme-orange .app-badge,.theme-orange .app-name { color: #ff6b35; }
+  .theme-purple .app-badge,.theme-purple .app-name { color: #b464ff; }
+  .theme-gold .app-badge,.theme-gold .app-name { color: #ffc832; }
+  .theme-pink .app-badge,.theme-pink .app-name { color: #ff6496; }
+  .theme-teal .app-badge,.theme-teal .app-name { color: #00c8b4; }
+  .theme-sky .app-badge,.theme-sky .app-name { color: #64b4ff; }
+  .theme-red .app-badge,.theme-red .app-name { color: #ff5050; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center; padding: 24px;
+    border-top: 1px solid var(--border);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* LOADING */
+  .loader {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: var(--bg);
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 20px;
+  }
+  .loader.show { display: flex; }
+  .loader-ring {
+    width: 60px; height: 60px; border-radius: 50%;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px; color: var(--accent); letter-spacing: 2px;
+  }
+
+  .role-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 4px; font-weight: 700;
+  }
+  .role-admin {
+    background: rgba(255,200,50,0.15);
+    border: 1px solid rgba(255,200,50,0.5);
+    color: #ffc832;
+  }
+  .role-user {
+    background: rgba(0,200,255,0.1);
+    border: 1px solid rgba(0,200,255,0.3);
+    color: var(--accent);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    .login-card { padding: 36px 24px; }
+    .main-content { padding: 20px 16px; }
+    .app-grid { grid-template-columns: 1fr; }
+    .topbar { padding: 0 16px; }
+    .brand-ver { display: none; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .logout-btn span { display: none; }
+  }
+  @media (min-width: 601px) and (max-width: 900px) {
+    .app-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="scanline"></div>
+<div class="bg-grid"></div>
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<!-- LOADER -->
+<div class="loader" id="loader">
+  <div class="loader-ring"></div>
+  <div class="loader-text">AUTHENTICATING...</div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-icon">⬡</div>
+      <div class="login-title">SOA NEXUS</div>
+      <div class="login-sub">// COMMAND CENTER v2.0</div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">USER ID</label>
+      <div class="field-wrap">
+        <span class="field-icon">👤</span>
+        <input class="login-input" type="text" id="username" placeholder="Enter username" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">ACCESS CODE</label>
+      <div class="field-wrap">
+        <span class="field-icon">🔐</span>
+        <input class="login-input" type="password" id="password" placeholder="Enter password">
+      </div>
+      <div class="error-msg" id="error-msg">⚠ ACCESS DENIED — Invalid credentials</div>
+    </div>
+
+    <button class="login-btn" onclick="doLogin()">
+      ⬡ INITIALIZE ACCESS
+    </button>
+
+    <div class="login-hint">
+      ติดต่อผู้ดูแลระบบเพื่อขอรหัสผ่าน
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <nav class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-icon">⬡</div>
+      <div>
+        <div class="brand-name">SOA NEXUS</div>
+        <div class="brand-ver">COMMAND CENTER v2.0</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="status-dot"></div>
+      <div class="user-chip">
+        <div class="user-avatar" id="user-avatar">A</div>
+        <span id="user-display">ADMIN</span>
+        <span id="role-badge" class="role-badge role-admin">ADMIN</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">⏻ <span>LOGOUT</span></button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="welcome-bar">
+      <div class="welcome-text">WELCOME, <span id="welcome-name">ADMIN</span></div>
+      <div class="welcome-sub">// Select a system module to proceed</div>
+      <div id="clock"></div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num">9</div>
+        <div class="stat-label">ระบบทั้งหมด</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--accent2)">9</div>
+        <div class="stat-label">ออนไลน์</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--accent3)">0</div>
+        <div class="stat-label">แจ้งเตือน</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--accent)">24/7</div>
+        <div class="stat-label">Uptime</div>
+      </div>
+    </div>
+
+    <div class="section-title">// SYSTEM MODULES</div>
+
+    <div class="app-grid" id="app-grid"></div>
+  </div>
+
+  <footer class="footer">
+    SOA NEXUS COMMAND CENTER © 2025 &nbsp;|&nbsp; ALL SYSTEMS OPERATIONAL &nbsp;|&nbsp; SECURE CONNECTION
+  </footer>
+</div>
+
+<script>
+// ===== CONFIG =====
+// credentials & roles — obfuscated, not shown on screen
+const _d = atob('YWRtaW46YWRtaW5obzpBRE1JTnxzb2E6bWFrcm9obzpVU0VS');
+const USERS = Object.fromEntries(
+  _d.split('|').map(e => { const [u,p,r] = e.split(':'); return [u, {pass:p, role:r}]; })
+);
+
+const APPS = [
+  {
+    name: 'E-BOOK',
+    desc: 'ระบบหนังสืออิเล็กทรอนิกส์ เอกสารและคู่มือดิจิทัลสำหรับองค์กร',
+    icon: '📚',
+    badge: 'LIBRARY',
+    url: 'https://wklangkr-byte.github.io/E-BOOK/',
+    theme: 'cyan',
+  },
+  {
+    name: 'SOA CHECK LIST',
+    desc: 'ระบบตรวจสอบรายการ Checklist สำหรับงาน SOA มาตรฐานสูง',
+    icon: '✅',
+    badge: 'QC',
+    url: 'https://wklangkr-byte.github.io/SOA_CHECK_LIST/',
+    theme: 'green',
+  },
+  {
+    name: 'SOA HOTEL',
+    desc: 'ระบบจัดการโรงแรม บริการลูกค้าและจองห้องพัก',
+    icon: '🏨',
+    badge: 'HOSPITALITY',
+    url: 'https://wklangkr-byte.github.io/SOA-Hotel/',
+    theme: 'gold',
+  },
+  {
+    name: 'AUDIT DASHBOARD',
+    desc: 'แดชบอร์ดตรวจสอบและวิเคราะห์ข้อมูลการดำเนินงาน',
+    icon: '📊',
+    badge: 'ANALYTICS',
+    url: 'https://wklangkr-byte.github.io/audit-dashboard/',
+    theme: 'purple',
+  },
+  {
+    name: 'MANPOWER',
+    desc: 'ระบบจัดการกำลังคน วางแผนและติดตามบุคลากร',
+    icon: '👥',
+    badge: 'HR',
+    url: 'https://wklangkr-byte.github.io/Manpower/',
+    theme: 'orange',
+  },
+  {
+    name: 'SHIFT SCHEDULE',
+    desc: 'ระบบจัดตารางกะการทำงาน วางแผนเวรประจำวัน',
+    icon: '📅',
+    badge: 'SCHEDULING',
+    url: 'https://wklangkr-byte.github.io/Shift-schedule/',
+    theme: 'teal',
+  },
+  {
+    name: 'SOA STOCK ONLINE',
+    desc: 'ระบบจัดการสต็อกสินค้าออนไลน์ ตรวจสอบเรียลไทม์',
+    icon: '📦',
+    badge: 'INVENTORY',
+    url: 'https://wklangkr-byte.github.io/SOA_STOCK_ONLINE/',
+    theme: 'sky',
+  },
+  {
+    name: 'SOA STOCK DATA',
+    desc: 'ฐานข้อมูลสต็อกสินค้า วิเคราะห์และรายงานข้อมูล',
+    icon: '🗃️',
+    badge: 'DATABASE',
+    url: 'https://wklangkr-byte.github.io/Soa_Stock_Data/',
+    theme: 'pink',
+  },
+  {
+    name: 'TEAM DIRECTORY',
+    desc: 'ทำเนียบทีมงาน ข้อมูลติดต่อและโครงสร้างองค์กร',
+    icon: '🗂️',
+    badge: 'DIRECTORY',
+    url: 'https://wklangkr-byte.github.io/Team_directory/',
+    theme: 'red',
+  },
+];
+
+// ===== RENDER CARDS =====
+function renderApps() {
+  const grid = document.getElementById('app-grid');
+  grid.innerHTML = APPS.map((app, i) => `
+    <a href="${app.url}" target="_blank" rel="noopener noreferrer"
+       class="app-card theme-${app.theme}"
+       style="animation: fadeUp 0.5s ease ${0.05 * i + 0.4}s both">
+      <div class="app-card-top">
+        <div class="app-icon-wrap">${app.icon}</div>
+        <div class="app-badge">${app.badge}</div>
+      </div>
+      <div class="app-name">${app.name}</div>
+      <div class="app-desc">${app.desc}</div>
+      <div class="app-footer">
+        <div class="app-url">${app.url.replace('https://', '')}</div>
+        <div class="open-arrow">↗</div>
+      </div>
+    </a>
+  `).join('');
+}
+
+// ===== LOGIN =====
+function doLogin() {
+  const u = document.getElementById('username').value.trim().toLowerCase();
+  const p = document.getElementById('password').value;
+  const err = document.getElementById('error-msg');
+
+  const match = USERS[u] && USERS[u].pass === p;
+  if (match) {
+    err.classList.remove('show');
+    const loader = document.getElementById('loader');
+    loader.classList.add('show');
+    setTimeout(() => {
+      loader.classList.remove('show');
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app').classList.add('active');
+      const name = u.toUpperCase();
+      const role = USERS[u].role;
+      document.getElementById('welcome-name').textContent = name;
+      document.getElementById('user-display').textContent = name;
+      document.getElementById('user-avatar').textContent = name[0];
+      // role badge
+      const badge = document.getElementById('role-badge');
+      badge.textContent = role;
+      badge.className = 'role-badge ' + (role === 'ADMIN' ? 'role-admin' : 'role-user');
+      renderApps();
+      startClock();
+    }, 1600);
+  } else {
+    err.classList.remove('show');
+    void err.offsetWidth;
+    err.classList.add('show');
+  }
+}
+
+function doLogout() {
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('username').value = '';
+  document.getElementById('password').value = '';
+  document.getElementById('error-msg').classList.remove('show');
+  document.getElementById('role-badge').textContent = '';
+}
+
+// ===== CLOCK =====
+function startClock() {
+  const el = document.getElementById('clock');
+  const update = () => {
+    const now = new Date();
+    el.textContent = '// ' + now.toLocaleString('th-TH', {
+      weekday: 'long', year: 'numeric', month: 'long',
+      day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+  };
+  update(); setInterval(update, 1000);
+}
+
+// ENTER KEY
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>
