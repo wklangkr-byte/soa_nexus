@@ -4,527 +4,400 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SOA NEXUS — Command Center</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Sarabun:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Sarabun:wght@300;400;600&family=Share+Tech+Mono&family=Prompt:wght@300;400;600&family=IBM+Plex+Sans+Thai:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #020810;
-    --surface: #060f1e;
-    --surface2: #0a1628;
-    --border: rgba(0,200,255,0.15);
-    --accent: #00c8ff;
-    --accent2: #00ff9d;
-    --accent3: #ff6b35;
-    --text: #e0f4ff;
-    --muted: #4a7a99;
-    --glow: 0 0 20px rgba(0,200,255,0.3);
-    --glow2: 0 0 20px rgba(0,255,157,0.3);
-  }
+/* ============================================================
+   THEME TOKENS
+   ============================================================ */
+:root,[data-theme="cyber-dark"]{
+  --bg:#020810;--surface:#060f1e;--surface2:#0a1628;
+  --topbar-bg:rgba(2,8,16,0.88);
+  --border:rgba(0,200,255,0.15);
+  --accent:#00c8ff;--accent2:#00ff9d;--accent3:#ff6b35;
+  --text:#e0f4ff;--text2:#a8cfe0;--muted:#4a7a99;
+  --card-bg:rgba(6,15,30,0.95);
+  --orb1:#00c8ff;--orb2:#00ff9d;--orb3:#ff6b35;
+  --grid-c:rgba(0,200,255,0.03);--scan-c:#00c8ff;
+  --font-body:'Sarabun',sans-serif;
+  --font-head:'Orbitron',monospace;
+  --font-mono:'Share Tech Mono',monospace;
+}
+[data-theme="pure-white"]{
+  --bg:#eef2f7;--surface:#ffffff;--surface2:#e2e8f0;
+  --topbar-bg:rgba(255,255,255,0.93);
+  --border:rgba(0,100,200,0.15);
+  --accent:#0070d8;--accent2:#00956e;--accent3:#d95f1a;
+  --text:#0d1f2d;--text2:#2a4a62;--muted:#6a8fa6;
+  --card-bg:rgba(255,255,255,0.98);
+  --orb1:#0070d8;--orb2:#00956e;--orb3:#d95f1a;
+  --grid-c:rgba(0,100,200,0.04);--scan-c:#0070d8;
+  --font-body:'Prompt',sans-serif;
+  --font-head:'Orbitron',monospace;
+  --font-mono:'Share Tech Mono',monospace;
+}
+[data-theme="midnight-purple"]{
+  --bg:#0b0814;--surface:#15102200;--surface:rgba(21,16,34,1);--surface2:#1e1530;
+  --topbar-bg:rgba(11,8,20,0.91);
+  --border:rgba(180,100,255,0.18);
+  --accent:#c060ff;--accent2:#ff60cc;--accent3:#60c8ff;
+  --text:#f0e0ff;--text2:#c8a8e0;--muted:#7a5599;
+  --card-bg:rgba(21,16,34,0.97);
+  --orb1:#c060ff;--orb2:#ff60cc;--orb3:#60c8ff;
+  --grid-c:rgba(180,100,255,0.04);--scan-c:#c060ff;
+  --font-body:'IBM Plex Sans Thai',sans-serif;
+  --font-head:'Orbitron',monospace;
+  --font-mono:'Share Tech Mono',monospace;
+}
+[data-theme="neon-green"]{
+  --bg:#010a04;--surface:#041408;--surface2:#071f0d;
+  --topbar-bg:rgba(1,10,4,0.91);
+  --border:rgba(0,255,100,0.15);
+  --accent:#00ff64;--accent2:#64ffcc;--accent3:#ffcc00;
+  --text:#ccffe0;--text2:#88ccaa;--muted:#2e7a48;
+  --card-bg:rgba(4,20,8,0.97);
+  --orb1:#00ff64;--orb2:#64ffcc;--orb3:#ffcc00;
+  --grid-c:rgba(0,255,100,0.04);--scan-c:#00ff64;
+  --font-body:'Share Tech Mono',monospace;
+  --font-head:'Share Tech Mono',monospace;
+  --font-mono:'Share Tech Mono',monospace;
+}
+[data-theme="rose-gold"]{
+  --bg:#190e13;--surface:#241520;--surface2:#2e1a2a;
+  --topbar-bg:rgba(25,14,19,0.91);
+  --border:rgba(230,145,120,0.18);
+  --accent:#e68c72;--accent2:#ffaа96;--accent2:#ffaa96;--accent3:#c8e696;
+  --text:#fff0ec;--text2:#e0bfb4;--muted:#8a5a50;
+  --card-bg:rgba(36,21,32,0.97);
+  --orb1:#e68c72;--orb2:#ffaa96;--orb3:#c8e696;
+  --grid-c:rgba(230,145,120,0.04);--scan-c:#e68c72;
+  --font-body:'Prompt',sans-serif;
+  --font-head:'Orbitron',monospace;
+  --font-mono:'Share Tech Mono',monospace;
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* ============================================================
+   BASE
+   ============================================================ */
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);color:var(--text);
+  min-height:100vh;overflow-x:hidden;
+  transition:background .5s,color .5s;
+}
 
-  body {
-    font-family: 'Sarabun', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+.bg-grid{
+  position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(var(--grid-c) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid-c) 1px,transparent 1px);
+  background-size:40px 40px;
+  animation:gridMove 20s linear infinite;
+}
+@keyframes gridMove{0%{background-position:0 0}100%{background-position:40px 40px}}
 
-  /* ANIMATED BACKGROUND */
-  .bg-grid {
-    position: fixed; inset: 0; z-index: 0;
-    background-image:
-      linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    animation: gridMove 20s linear infinite;
-  }
-  @keyframes gridMove {
-    0% { background-position: 0 0; }
-    100% { background-position: 40px 40px; }
-  }
+.bg-orbs{position:fixed;inset:0;z-index:0;pointer-events:none}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.12;animation:orbFloat 8s ease-in-out infinite}
+.orb1{width:400px;height:400px;background:var(--orb1);top:-100px;left:-100px}
+.orb2{width:300px;height:300px;background:var(--orb2);bottom:-80px;right:-80px;animation-delay:3s}
+.orb3{width:250px;height:250px;background:var(--orb3);top:50%;left:50%;animation-delay:5s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-20px) scale(1.1)}}
 
-  .bg-orbs {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  }
-  .orb {
-    position: absolute; border-radius: 50%;
-    filter: blur(80px); opacity: 0.12; animation: orbFloat 8s ease-in-out infinite;
-  }
-  .orb1 { width: 400px; height: 400px; background: var(--accent); top: -100px; left: -100px; animation-delay: 0s; }
-  .orb2 { width: 300px; height: 300px; background: var(--accent2); bottom: -80px; right: -80px; animation-delay: 3s; }
-  .orb3 { width: 250px; height: 250px; background: var(--accent3); top: 50%; left: 50%; animation-delay: 5s; }
-  @keyframes orbFloat {
-    0%,100% { transform: translate(0,0) scale(1); }
-    50% { transform: translate(30px,-20px) scale(1.1); }
-  }
+.scanline{
+  position:fixed;top:-2px;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--scan-c),transparent);
+  z-index:9999;animation:scan 4s linear infinite;opacity:.4;
+}
+@keyframes scan{0%{top:-3px}100%{top:100vh}}
 
-  /* SCAN LINE */
-  .scanline {
-    position: fixed; top: -2px; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    z-index: 9999; animation: scan 4s linear infinite; opacity: 0.4;
-  }
-  @keyframes scan {
-    0% { top: -3px; } 100% { top: 100vh; }
-  }
+/* ============================================================
+   THEME PANEL
+   ============================================================ */
+.theme-btn{
+  width:34px;height:34px;border-radius:9px;
+  background:rgba(128,128,128,0.08);
+  border:1px solid var(--border);
+  color:var(--text2);font-size:17px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .3s;
+}
+.theme-btn:hover{border-color:var(--accent);background:rgba(128,128,128,0.14)}
 
-  /* ===== LOGIN SCREEN ===== */
-  #login-screen {
-    position: fixed; inset: 0; z-index: 100;
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-  }
+.theme-panel{
+  display:none;position:absolute;top:46px;right:0;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:18px;padding:20px;
+  width:292px;z-index:300;
+  box-shadow:0 24px 64px rgba(0,0,0,0.55);
+  animation:panelIn .22s cubic-bezier(.16,1,.3,1) both;
+}
+.theme-panel.open{display:block}
+@keyframes panelIn{from{opacity:0;transform:translateY(-8px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 
-  .login-card {
-    position: relative; z-index: 1;
-    background: linear-gradient(145deg, rgba(6,15,30,0.95), rgba(10,22,40,0.95));
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 48px 40px;
-    width: 100%; max-width: 420px;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 0 60px rgba(0,200,255,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
-    animation: cardIn 0.6s cubic-bezier(0.16,1,0.3,1) both;
-  }
-  @keyframes cardIn {
-    from { opacity: 0; transform: translateY(30px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
+.pnl-title{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:2px;
+  color:var(--muted);text-transform:uppercase;margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+.pnl-title::after{content:'';flex:1;height:1px;background:var(--border)}
 
-  .login-card::before {
-    content: ''; position: absolute; inset: -1px;
-    border-radius: 21px;
-    background: linear-gradient(135deg, var(--accent), transparent, var(--accent2));
-    z-index: -1; opacity: 0.3;
-  }
+/* SWATCHES ROW */
+.theme-swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}
+.swatch-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.swatch{
+  width:42px;height:42px;border-radius:12px;
+  border:2px solid transparent;
+  transition:all .25s;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;overflow:hidden;
+}
+.swatch:hover{transform:scale(1.12)}
+.swatch.active{border-color:var(--accent);box-shadow:0 0 16px rgba(128,200,255,.25)}
+.swatch-lbl{font-family:var(--font-mono);font-size:8px;color:var(--muted);letter-spacing:.5px;text-align:center}
 
-  .login-logo {
-    text-align: center; margin-bottom: 32px;
-  }
-  .logo-icon {
-    width: 64px; height: 64px; margin: 0 auto 16px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 28px; box-shadow: var(--glow);
-    animation: logoPulse 3s ease-in-out infinite;
-  }
-  @keyframes logoPulse {
-    0%,100% { box-shadow: 0 0 20px rgba(0,200,255,0.3); }
-    50% { box-shadow: 0 0 40px rgba(0,200,255,0.6), 0 0 60px rgba(0,255,157,0.2); }
-  }
-  .login-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 22px; font-weight: 900;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    letter-spacing: 3px;
-  }
-  .login-sub {
-    font-size: 12px; color: var(--muted); margin-top: 4px;
-    font-family: 'Share Tech Mono', monospace; letter-spacing: 1px;
-  }
+.sw-cyber   {background:linear-gradient(135deg,#020810,#003444)}
+.sw-white   {background:linear-gradient(135deg,#e8eff8,#b0ccee)}
+.sw-purple  {background:linear-gradient(135deg,#0c0814,#2a0c48)}
+.sw-matrix  {background:linear-gradient(135deg,#010a04,#003318)}
+.sw-rose    {background:linear-gradient(135deg,#190e13,#3d1828)}
 
-  .field-group { margin-bottom: 20px; }
-  .field-label {
-    font-size: 11px; font-family: 'Share Tech Mono', monospace;
-    color: var(--accent); letter-spacing: 2px; text-transform: uppercase;
-    margin-bottom: 8px; display: block;
-  }
-  .field-wrap {
-    position: relative;
-  }
-  .field-icon {
-    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
-    color: var(--muted); font-size: 16px; pointer-events: none;
-  }
-  .login-input {
-    width: 100%;
-    background: rgba(0,200,255,0.04);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 13px 14px 13px 42px;
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px;
-    outline: none;
-    transition: all 0.3s;
-  }
-  .login-input:focus {
-    border-color: var(--accent);
-    background: rgba(0,200,255,0.08);
-    box-shadow: 0 0 0 3px rgba(0,200,255,0.1);
-  }
-  .login-input::placeholder { color: rgba(74,122,153,0.6); }
+/* FONT OPTIONS */
+.font-options{display:flex;flex-direction:column;gap:7px}
+.font-opt{
+  background:rgba(128,128,128,0.05);
+  border:1px solid var(--border);
+  border-radius:10px;padding:9px 14px;
+  cursor:pointer;transition:all .25s;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.font-opt:hover{border-color:var(--accent);background:rgba(128,128,128,0.1)}
+.font-opt.active{border-color:var(--accent);background:rgba(128,128,128,0.07)}
+.font-opt-inner{display:flex;flex-direction:column;gap:2px}
+.font-name{font-size:13px;color:var(--text);transition:color .5s}
+.font-preview{font-size:11px;color:var(--muted)}
+.font-check{color:var(--accent);font-size:14px;opacity:0;transition:opacity .2s}
+.font-opt.active .font-check{opacity:1}
 
-  .error-msg {
-    display: none; margin-top: 8px;
-    font-size: 12px; color: #ff4d6d;
-    font-family: 'Share Tech Mono', monospace;
-    padding: 8px 12px;
-    background: rgba(255,77,109,0.1);
-    border: 1px solid rgba(255,77,109,0.3);
-    border-radius: 6px;
-  }
-  .error-msg.show { display: block; animation: shake 0.3s ease; }
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    25% { transform: translateX(-6px); }
-    75% { transform: translateX(6px); }
-  }
+/* ============================================================
+   LOGIN
+   ============================================================ */
+#login-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{
+  position:relative;z-index:1;
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:20px;padding:48px 40px;
+  width:100%;max-width:420px;
+  backdrop-filter:blur(20px);
+  box-shadow:0 0 60px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05);
+  animation:cardIn .6s cubic-bezier(.16,1,.3,1) both;
+  transition:background .5s,border-color .5s;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(30px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+.login-card::before{
+  content:'';position:absolute;inset:-1px;border-radius:21px;
+  background:linear-gradient(135deg,var(--accent),transparent,var(--accent2));
+  z-index:-1;opacity:.25;transition:background .5s;
+}
+.login-logo{text-align:center;margin-bottom:32px}
+.logo-icon{
+  width:64px;height:64px;margin:0 auto 16px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:28px;animation:logoPulse 3s ease-in-out infinite;transition:background .5s;
+}
+@keyframes logoPulse{0%,100%{box-shadow:0 0 20px rgba(0,0,0,.2)}50%{box-shadow:0 0 40px rgba(0,0,0,.4)}}
+.login-title{
+  font-family:var(--font-head);font-size:22px;font-weight:900;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:3px;transition:background .5s;
+}
+.login-sub{font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--font-mono);letter-spacing:1px}
+.field-group{margin-bottom:20px}
+.field-label{font-size:11px;font-family:var(--font-mono);color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:block;transition:color .5s}
+.field-wrap{position:relative}
+.field-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px;pointer-events:none}
+.login-input{
+  width:100%;background:rgba(128,128,128,.05);
+  border:1px solid var(--border);border-radius:10px;
+  padding:13px 14px 13px 42px;color:var(--text);
+  font-family:var(--font-mono);font-size:14px;outline:none;transition:all .3s;
+}
+.login-input:focus{border-color:var(--accent);background:rgba(128,128,128,.09);box-shadow:0 0 0 3px rgba(128,128,128,.08)}
+.login-input::placeholder{color:var(--muted);opacity:.6}
+.error-msg{
+  display:none;margin-top:8px;font-size:12px;color:#ff4d6d;
+  font-family:var(--font-mono);padding:8px 12px;
+  background:rgba(255,77,109,.1);border:1px solid rgba(255,77,109,.3);border-radius:6px;
+}
+.error-msg.show{display:block;animation:shake .3s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.login-btn{
+  width:100%;padding:14px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none;border-radius:10px;color:#000;
+  font-family:var(--font-head);font-size:13px;font-weight:700;letter-spacing:2px;
+  cursor:pointer;margin-top:8px;transition:all .3s;position:relative;overflow:hidden;
+}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,0,0,.3)}
+.login-btn:active{transform:translateY(0)}
+.login-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,.2),transparent);transform:translateX(-100%);transition:transform .5s}
+.login-btn:hover::after{transform:translateX(100%)}
+.login-hint{margin-top:24px;padding-top:20px;border-top:1px solid var(--border);text-align:center;font-size:11px;color:var(--muted);font-family:var(--font-mono)}
 
-  .login-btn {
-    width: 100%; padding: 14px;
-    background: linear-gradient(135deg, var(--accent), #0066cc);
-    border: none; border-radius: 10px;
-    color: #000; font-family: 'Orbitron', monospace;
-    font-size: 13px; font-weight: 700; letter-spacing: 2px;
-    cursor: pointer; margin-top: 8px;
-    transition: all 0.3s;
-    position: relative; overflow: hidden;
-  }
-  .login-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,200,255,0.4);
-  }
-  .login-btn:active { transform: translateY(0); }
-  .login-btn::after {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, transparent, rgba(255,255,255,0.2), transparent);
-    transform: translateX(-100%); transition: transform 0.5s;
-  }
-  .login-btn:hover::after { transform: translateX(100%); }
+/* ============================================================
+   MAIN APP
+   ============================================================ */
+#app{display:none;position:relative;z-index:1;min-height:100vh;flex-direction:column}
+#app.active{display:flex}
 
-  .login-hint {
-    margin-top: 24px; padding-top: 20px;
-    border-top: 1px solid var(--border);
-    text-align: center;
-    font-size: 11px; color: var(--muted);
-    font-family: 'Share Tech Mono', monospace;
-  }
-  .hint-cred { color: var(--accent2); }
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:var(--topbar-bg);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 24px;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  animation:slideDown .5s ease both;transition:background .5s,border-color .5s;
+}
+@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
 
-  /* ===== MAIN APP ===== */
-  #app {
-    display: none; position: relative; z-index: 1;
-    min-height: 100vh; flex-direction: column;
-  }
-  #app.active { display: flex; }
+.topbar-brand{display:flex;align-items:center;gap:12px}
+.brand-icon{
+  width:36px;height:36px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  font-size:16px;transition:background .5s;
+}
+.brand-name{
+  font-family:var(--font-head);font-size:16px;font-weight:900;letter-spacing:2px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;transition:background .5s;
+}
+.brand-ver{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:1px}
 
-  /* TOPBAR */
-  .topbar {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(2,8,16,0.85);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    padding: 0 24px;
-    height: 64px;
-    display: flex; align-items: center; justify-content: space-between;
-    animation: slideDown 0.5s ease both;
-  }
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+.topbar-right{display:flex;align-items:center;gap:10px;position:relative}
+.status-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent2);box-shadow:0 0 8px var(--accent2);
+  animation:blink 2s ease-in-out infinite;transition:background .5s,box-shadow .5s;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-  .topbar-brand {
-    display: flex; align-items: center; gap: 12px;
-  }
-  .brand-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-  }
-  .brand-name {
-    font-family: 'Orbitron', monospace;
-    font-size: 16px; font-weight: 900; letter-spacing: 2px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  }
-  .brand-ver {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px; color: var(--muted); letter-spacing: 1px;
-  }
+.user-chip{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(128,128,128,.08);border:1px solid var(--border);
+  border-radius:20px;padding:6px 14px;font-size:13px;transition:all .3s;
+}
+.user-avatar{
+  width:24px;height:24px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#000;transition:background .5s;
+}
+.logout-btn{
+  background:none;border:1px solid rgba(255,77,109,.3);
+  color:#ff4d6d;border-radius:8px;padding:6px 12px;
+  font-size:12px;cursor:pointer;font-family:var(--font-mono);
+  transition:all .3s;letter-spacing:1px;
+}
+.logout-btn:hover{background:rgba(255,77,109,.1);border-color:#ff4d6d}
+.role-badge{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:4px;font-weight:700}
+.role-admin{background:rgba(255,200,50,.15);border:1px solid rgba(255,200,50,.5);color:#ffc832}
+.role-user{background:rgba(128,200,255,.1);border:1px solid rgba(128,200,255,.3);color:var(--accent)}
 
-  .topbar-right { display: flex; align-items: center; gap: 16px; }
-  .status-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--accent2);
-    box-shadow: 0 0 8px var(--accent2);
-    animation: blink 2s ease-in-out infinite;
-  }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+/* MAIN CONTENT */
+.main-content{flex:1;padding:32px 24px;max-width:1280px;margin:0 auto;width:100%}
+.welcome-bar{margin-bottom:32px;animation:fadeUp .6s ease .2s both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.welcome-text{font-family:var(--font-head);font-size:clamp(20px,4vw,28px);font-weight:700;color:var(--text);letter-spacing:2px}
+.welcome-text span{color:var(--accent);transition:color .5s}
+.welcome-sub{font-size:13px;color:var(--muted);margin-top:6px;font-family:var(--font-mono)}
+#clock{font-family:var(--font-mono);font-size:13px;color:var(--accent2);margin-top:4px;transition:color .5s}
 
-  .user-chip {
-    display: flex; align-items: center; gap: 8px;
-    background: rgba(0,200,255,0.08);
-    border: 1px solid var(--border);
-    border-radius: 20px; padding: 6px 14px;
-    font-size: 13px; cursor: pointer;
-    transition: all 0.3s;
-  }
-  .user-chip:hover { border-color: var(--accent); background: rgba(0,200,255,0.12); }
-  .user-avatar {
-    width: 24px; height: 24px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: #000;
-  }
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:32px;animation:fadeUp .6s ease .3s both}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:16px 20px;position:relative;overflow:hidden;
+  transition:background .5s,border-color .5s;
+}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent);transition:background .5s}
+.stat-num{font-family:var(--font-head);font-size:28px;font-weight:900;color:var(--accent);transition:color .5s}
+.stat-label{font-size:12px;color:var(--muted);margin-top:4px}
 
-  .logout-btn {
-    background: none; border: 1px solid rgba(255,77,109,0.3);
-    color: #ff4d6d; border-radius: 8px; padding: 6px 12px;
-    font-size: 12px; cursor: pointer; font-family: 'Share Tech Mono', monospace;
-    transition: all 0.3s; letter-spacing: 1px;
-  }
-  .logout-btn:hover { background: rgba(255,77,109,0.1); border-color: #ff4d6d; }
+.section-title{font-family:var(--font-head);font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.section-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
 
-  /* MAIN CONTENT */
-  .main-content {
-    flex: 1; padding: 32px 24px;
-    max-width: 1280px; margin: 0 auto; width: 100%;
-  }
+.app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;animation:fadeUp .6s ease .4s both}
+.app-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:24px;
+  cursor:pointer;text-decoration:none;color:inherit;
+  transition:all .35s cubic-bezier(.16,1,.3,1);
+  position:relative;overflow:hidden;display:block;
+}
+.app-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(128,200,255,.04),transparent);opacity:0;transition:opacity .3s}
+.app-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.app-card:hover::before{opacity:1}
+.app-card-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.app-icon-wrap{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;transition:transform .3s}
+.app-card:hover .app-icon-wrap{transform:scale(1.1) rotate(-3deg)}
+.app-badge{font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:4px 8px;border-radius:4px;border:1px solid currentColor;opacity:.7}
+.app-name{font-family:var(--font-head);font-size:14px;font-weight:700;letter-spacing:1px;margin-bottom:8px;transition:color .5s}
+.app-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+.app-footer{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border)}
+.app-url{font-family:var(--font-mono);font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px}
+.open-arrow{width:28px;height:28px;border-radius:8px;background:rgba(128,200,255,.08);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .3s;flex-shrink:0}
+.app-card:hover .open-arrow{background:var(--accent);color:#000;border-color:var(--accent);transform:rotate(-45deg)}
 
-  .welcome-bar {
-    margin-bottom: 32px; animation: fadeUp 0.6s ease 0.2s both;
-  }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .welcome-text {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(20px, 4vw, 28px); font-weight: 700;
-    color: var(--text); letter-spacing: 2px;
-  }
-  .welcome-text span { color: var(--accent); }
-  .welcome-sub {
-    font-size: 13px; color: var(--muted); margin-top: 6px;
-    font-family: 'Share Tech Mono', monospace;
-  }
-  #clock {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 13px; color: var(--accent2);
-    margin-top: 4px;
-  }
+.theme-cyan  .app-icon-wrap{background:rgba(0,200,255,.1);border:1px solid rgba(0,200,255,.2)}
+.theme-green .app-icon-wrap{background:rgba(0,255,157,.1);border:1px solid rgba(0,255,157,.2)}
+.theme-orange .app-icon-wrap{background:rgba(255,107,53,.1);border:1px solid rgba(255,107,53,.2)}
+.theme-purple .app-icon-wrap{background:rgba(180,100,255,.1);border:1px solid rgba(180,100,255,.2)}
+.theme-gold  .app-icon-wrap{background:rgba(255,200,50,.1);border:1px solid rgba(255,200,50,.2)}
+.theme-pink  .app-icon-wrap{background:rgba(255,100,150,.1);border:1px solid rgba(255,100,150,.2)}
+.theme-teal  .app-icon-wrap{background:rgba(0,200,180,.1);border:1px solid rgba(0,200,180,.2)}
+.theme-sky   .app-icon-wrap{background:rgba(100,180,255,.1);border:1px solid rgba(100,180,255,.2)}
+.theme-red   .app-icon-wrap{background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.2)}
+.theme-cyan  .app-badge,.theme-cyan  .app-name{color:#00c8ff}
+.theme-green .app-badge,.theme-green .app-name{color:#00ff9d}
+.theme-orange .app-badge,.theme-orange .app-name{color:#ff6b35}
+.theme-purple .app-badge,.theme-purple .app-name{color:#b464ff}
+.theme-gold  .app-badge,.theme-gold  .app-name{color:#ffc832}
+.theme-pink  .app-badge,.theme-pink  .app-name{color:#ff6496}
+.theme-teal  .app-badge,.theme-teal  .app-name{color:#00c8b4}
+.theme-sky   .app-badge,.theme-sky   .app-name{color:#64b4ff}
+.theme-red   .app-badge,.theme-red   .app-name{color:#ff5050}
 
-  /* STATS ROW */
-  .stats-row {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 16px; margin-bottom: 32px;
-    animation: fadeUp 0.6s ease 0.3s both;
-  }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px; padding: 16px 20px;
-    position: relative; overflow: hidden;
-  }
-  .stat-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, var(--accent), transparent);
-  }
-  .stat-num {
-    font-family: 'Orbitron', monospace;
-    font-size: 28px; font-weight: 900; color: var(--accent);
-  }
-  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.footer{text-align:center;padding:24px;border-top:1px solid var(--border);font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:1px}
+.loader{display:none;position:fixed;inset:0;z-index:200;background:var(--bg);align-items:center;justify-content:center;flex-direction:column;gap:20px}
+.loader.show{display:flex}
+.loader-ring{width:60px;height:60px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{font-family:var(--font-mono);font-size:13px;color:var(--accent);letter-spacing:2px}
 
-  /* SECTION TITLE */
-  .section-title {
-    font-family: 'Orbitron', monospace;
-    font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 20px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .section-title::after {
-    content: ''; flex: 1; height: 1px;
-    background: linear-gradient(90deg, var(--border), transparent);
-  }
-
-  /* APP GRID */
-  .app-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-    animation: fadeUp 0.6s ease 0.4s both;
-  }
-
-  .app-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px; padding: 24px;
-    cursor: pointer; text-decoration: none; color: inherit;
-    transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
-    position: relative; overflow: hidden;
-    display: block;
-  }
-  .app-card::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(0,200,255,0.05), transparent);
-    opacity: 0; transition: opacity 0.3s;
-  }
-  .app-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0,200,255,0.15), var(--glow);
-  }
-  .app-card:hover::before { opacity: 1; }
-
-  .app-card-top {
-    display: flex; align-items: flex-start; justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .app-icon-wrap {
-    width: 56px; height: 56px; border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px; position: relative;
-    transition: transform 0.3s;
-  }
-  .app-card:hover .app-icon-wrap { transform: scale(1.1) rotate(-3deg); }
-
-  .app-badge {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
-    padding: 4px 8px; border-radius: 4px;
-    border: 1px solid currentColor; opacity: 0.7;
-  }
-
-  .app-name {
-    font-family: 'Orbitron', monospace;
-    font-size: 14px; font-weight: 700; letter-spacing: 1px;
-    margin-bottom: 8px; color: var(--text);
-  }
-  .app-desc {
-    font-size: 13px; color: var(--muted); line-height: 1.6;
-    margin-bottom: 16px;
-  }
-
-  .app-footer {
-    display: flex; align-items: center; justify-content: space-between;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-  }
-  .app-url {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px; color: var(--muted);
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    max-width: 200px;
-  }
-  .open-arrow {
-    width: 28px; height: 28px; border-radius: 8px;
-    background: rgba(0,200,255,0.1);
-    border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; transition: all 0.3s; flex-shrink: 0;
-  }
-  .app-card:hover .open-arrow {
-    background: var(--accent); color: #000;
-    border-color: var(--accent);
-    transform: rotate(-45deg);
-  }
-
-  /* THEME COLORS PER CARD */
-  .theme-cyan .app-icon-wrap { background: rgba(0,200,255,0.1); border: 1px solid rgba(0,200,255,0.2); }
-  .theme-green .app-icon-wrap { background: rgba(0,255,157,0.1); border: 1px solid rgba(0,255,157,0.2); }
-  .theme-orange .app-icon-wrap { background: rgba(255,107,53,0.1); border: 1px solid rgba(255,107,53,0.2); }
-  .theme-purple .app-icon-wrap { background: rgba(180,100,255,0.1); border: 1px solid rgba(180,100,255,0.2); }
-  .theme-gold .app-icon-wrap { background: rgba(255,200,50,0.1); border: 1px solid rgba(255,200,50,0.2); }
-  .theme-pink .app-icon-wrap { background: rgba(255,100,150,0.1); border: 1px solid rgba(255,100,150,0.2); }
-  .theme-teal .app-icon-wrap { background: rgba(0,200,180,0.1); border: 1px solid rgba(0,200,180,0.2); }
-  .theme-sky .app-icon-wrap { background: rgba(100,180,255,0.1); border: 1px solid rgba(100,180,255,0.2); }
-  .theme-red .app-icon-wrap { background: rgba(255,80,80,0.1); border: 1px solid rgba(255,80,80,0.2); }
-
-  .theme-cyan .app-badge,.theme-cyan .app-name { color: #00c8ff; }
-  .theme-green .app-badge,.theme-green .app-name { color: #00ff9d; }
-  .theme-orange .app-badge,.theme-orange .app-name { color: #ff6b35; }
-  .theme-purple .app-badge,.theme-purple .app-name { color: #b464ff; }
-  .theme-gold .app-badge,.theme-gold .app-name { color: #ffc832; }
-  .theme-pink .app-badge,.theme-pink .app-name { color: #ff6496; }
-  .theme-teal .app-badge,.theme-teal .app-name { color: #00c8b4; }
-  .theme-sky .app-badge,.theme-sky .app-name { color: #64b4ff; }
-  .theme-red .app-badge,.theme-red .app-name { color: #ff5050; }
-
-  /* FOOTER */
-  .footer {
-    text-align: center; padding: 24px;
-    border-top: 1px solid var(--border);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px; color: var(--muted);
-    letter-spacing: 1px;
-  }
-
-  /* LOADING */
-  .loader {
-    display: none; position: fixed; inset: 0; z-index: 200;
-    background: var(--bg);
-    align-items: center; justify-content: center;
-    flex-direction: column; gap: 20px;
-  }
-  .loader.show { display: flex; }
-  .loader-ring {
-    width: 60px; height: 60px; border-radius: 50%;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent);
-    animation: spin 0.8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loader-text {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 13px; color: var(--accent); letter-spacing: 2px;
-  }
-
-  .role-badge {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-    padding: 3px 8px; border-radius: 4px; font-weight: 700;
-  }
-  .role-admin {
-    background: rgba(255,200,50,0.15);
-    border: 1px solid rgba(255,200,50,0.5);
-    color: #ffc832;
-  }
-  .role-user {
-    background: rgba(0,200,255,0.1);
-    border: 1px solid rgba(0,200,255,0.3);
-    color: var(--accent);
-  }
-
-  /* RESPONSIVE */
-  @media (max-width: 600px) {
-    .login-card { padding: 36px 24px; }
-    .main-content { padding: 20px 16px; }
-    .app-grid { grid-template-columns: 1fr; }
-    .topbar { padding: 0 16px; }
-    .brand-ver { display: none; }
-    .stats-row { grid-template-columns: repeat(2, 1fr); }
-    .logout-btn span { display: none; }
-  }
-  @media (min-width: 601px) and (max-width: 900px) {
-    .app-grid { grid-template-columns: repeat(2, 1fr); }
-  }
+@media(max-width:600px){
+  .login-card{padding:36px 24px}
+  .main-content{padding:20px 16px}
+  .app-grid{grid-template-columns:1fr}
+  .topbar{padding:0 16px}
+  .brand-ver,.status-dot{display:none}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .logout-btn span{display:none}
+  .theme-panel{right:-50px;width:260px}
+}
+@media(min-width:601px) and (max-width:900px){.app-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 
 <div class="scanline"></div>
 <div class="bg-grid"></div>
-<div class="bg-orbs">
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
-  <div class="orb orb3"></div>
-</div>
+<div class="bg-orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
 
-<!-- LOADER -->
-<div class="loader" id="loader">
-  <div class="loader-ring"></div>
-  <div class="loader-text">AUTHENTICATING...</div>
-</div>
+<div class="loader" id="loader"><div class="loader-ring"></div><div class="loader-text">AUTHENTICATING...</div></div>
 
-<!-- LOGIN SCREEN -->
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-card">
     <div class="login-logo">
@@ -532,7 +405,6 @@
       <div class="login-title">SOA NEXUS</div>
       <div class="login-sub">// COMMAND CENTER v2.0</div>
     </div>
-
     <div class="field-group">
       <label class="field-label">USER ID</label>
       <div class="field-wrap">
@@ -540,7 +412,6 @@
         <input class="login-input" type="text" id="username" placeholder="Enter username" autocomplete="off">
       </div>
     </div>
-
     <div class="field-group">
       <label class="field-label">ACCESS CODE</label>
       <div class="field-wrap">
@@ -549,14 +420,8 @@
       </div>
       <div class="error-msg" id="error-msg">⚠ ACCESS DENIED — Invalid credentials</div>
     </div>
-
-    <button class="login-btn" onclick="doLogin()">
-      ⬡ INITIALIZE ACCESS
-    </button>
-
-    <div class="login-hint">
-      ติดต่อผู้ดูแลระบบเพื่อขอรหัสผ่าน
-    </div>
+    <button class="login-btn" onclick="doLogin()">⬡ INITIALIZE ACCESS</button>
+    <div class="login-hint">ติดต่อผู้ดูแลระบบเพื่อขอรหัสผ่าน</div>
   </div>
 </div>
 
@@ -577,6 +442,71 @@
         <span id="user-display">ADMIN</span>
         <span id="role-badge" class="role-badge role-admin">ADMIN</span>
       </div>
+
+      <!-- THEME TOGGLE -->
+      <div style="position:relative">
+        <button class="theme-btn" id="theme-btn" onclick="togglePanel()" title="เปลี่ยนธีม / ฟอนต์">🎨</button>
+        <div class="theme-panel" id="theme-panel">
+
+          <div class="pnl-title">พื้นหลัง</div>
+          <div class="theme-swatches">
+            <div class="swatch-wrap" onclick="setTheme('cyber-dark')">
+              <div class="swatch sw-cyber active" id="sw-cyber-dark">🌑</div>
+              <div class="swatch-lbl">CYBER</div>
+            </div>
+            <div class="swatch-wrap" onclick="setTheme('pure-white')">
+              <div class="swatch sw-white" id="sw-pure-white">☀️</div>
+              <div class="swatch-lbl">WHITE</div>
+            </div>
+            <div class="swatch-wrap" onclick="setTheme('midnight-purple')">
+              <div class="swatch sw-purple" id="sw-midnight-purple">🔮</div>
+              <div class="swatch-lbl">PURPLE</div>
+            </div>
+            <div class="swatch-wrap" onclick="setTheme('neon-green')">
+              <div class="swatch sw-matrix" id="sw-neon-green">💚</div>
+              <div class="swatch-lbl">MATRIX</div>
+            </div>
+            <div class="swatch-wrap" onclick="setTheme('rose-gold')">
+              <div class="swatch sw-rose" id="sw-rose-gold">🌸</div>
+              <div class="swatch-lbl">ROSE</div>
+            </div>
+          </div>
+
+          <div class="pnl-title">ฟอนต์</div>
+          <div class="font-options">
+            <div class="font-opt active" id="fo-sarabun" onclick="setFont('sarabun')">
+              <div class="font-opt-inner">
+                <span class="font-name" style="font-family:'Sarabun',sans-serif">Sarabun</span>
+                <span class="font-preview" style="font-family:'Sarabun',sans-serif">สวัสดีครับ — Hello World</span>
+              </div>
+              <span class="font-check">✓</span>
+            </div>
+            <div class="font-opt" id="fo-prompt" onclick="setFont('prompt')">
+              <div class="font-opt-inner">
+                <span class="font-name" style="font-family:'Prompt',sans-serif">Prompt</span>
+                <span class="font-preview" style="font-family:'Prompt',sans-serif">สวัสดีครับ — Hello World</span>
+              </div>
+              <span class="font-check">✓</span>
+            </div>
+            <div class="font-opt" id="fo-ibm" onclick="setFont('ibm')">
+              <div class="font-opt-inner">
+                <span class="font-name" style="font-family:'IBM Plex Sans Thai',sans-serif">IBM Plex</span>
+                <span class="font-preview" style="font-family:'IBM Plex Sans Thai',sans-serif">สวัสดีครับ — Hello World</span>
+              </div>
+              <span class="font-check">✓</span>
+            </div>
+            <div class="font-opt" id="fo-mono" onclick="setFont('mono')">
+              <div class="font-opt-inner">
+                <span class="font-name" style="font-family:'Share Tech Mono',monospace">Mono</span>
+                <span class="font-preview" style="font-family:'Share Tech Mono',monospace">Sawasdee — Hello World</span>
+              </div>
+              <span class="font-check">✓</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       <button class="logout-btn" onclick="doLogout()">⏻ <span>LOGOUT</span></button>
     </div>
   </nav>
@@ -587,200 +517,132 @@
       <div class="welcome-sub">// Select a system module to proceed</div>
       <div id="clock"></div>
     </div>
-
     <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-num">9</div>
-        <div class="stat-label">ระบบทั้งหมด</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" style="color:var(--accent2)">9</div>
-        <div class="stat-label">ออนไลน์</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" style="color:var(--accent3)">0</div>
-        <div class="stat-label">แจ้งเตือน</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" style="color:var(--accent)">24/7</div>
-        <div class="stat-label">Uptime</div>
-      </div>
+      <div class="stat-card"><div class="stat-num">9</div><div class="stat-label">ระบบทั้งหมด</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--accent2)">9</div><div class="stat-label">ออนไลน์</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--accent3)">0</div><div class="stat-label">แจ้งเตือน</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--accent)">24/7</div><div class="stat-label">Uptime</div></div>
     </div>
-
     <div class="section-title">// SYSTEM MODULES</div>
-
     <div class="app-grid" id="app-grid"></div>
   </div>
 
-  <footer class="footer">
-    SOA NEXUS COMMAND CENTER © 2025 &nbsp;|&nbsp; ALL SYSTEMS OPERATIONAL &nbsp;|&nbsp; SECURE CONNECTION
-  </footer>
+  <footer class="footer">SOA NEXUS COMMAND CENTER © 2025 &nbsp;|&nbsp; ALL SYSTEMS OPERATIONAL &nbsp;|&nbsp; SECURE CONNECTION</footer>
 </div>
 
 <script>
-// ===== CONFIG =====
-// credentials & roles — obfuscated, not shown on screen
+/* AUTH */
 const _d = atob('YWRtaW46YWRtaW5obzpBRE1JTnxzb2E6bWFrcm9obzpVU0VS');
-const USERS = Object.fromEntries(
-  _d.split('|').map(e => { const [u,p,r] = e.split(':'); return [u, {pass:p, role:r}]; })
-);
+const USERS = Object.fromEntries(_d.split('|').map(e=>{const[u,p,r]=e.split(':');return[u,{pass:p,role:r}];}));
 
-const APPS = [
-  {
-    name: 'E-BOOK',
-    desc: 'ระบบหนังสืออิเล็กทรอนิกส์ เอกสารและคู่มือดิจิทัลสำหรับองค์กร',
-    icon: '📚',
-    badge: 'LIBRARY',
-    url: 'https://wklangkr-byte.github.io/E-BOOK/',
-    theme: 'cyan',
-  },
-  {
-    name: 'SOA CHECK LIST',
-    desc: 'ระบบตรวจสอบรายการ Checklist สำหรับงาน SOA มาตรฐานสูง',
-    icon: '✅',
-    badge: 'QC',
-    url: 'https://wklangkr-byte.github.io/SOA_CHECK_LIST/',
-    theme: 'green',
-  },
-  {
-    name: 'SOA HOTEL',
-    desc: 'ระบบจัดการโรงแรม บริการลูกค้าและจองห้องพัก',
-    icon: '🏨',
-    badge: 'HOSPITALITY',
-    url: 'https://wklangkr-byte.github.io/SOA-Hotel/',
-    theme: 'gold',
-  },
-  {
-    name: 'AUDIT DASHBOARD',
-    desc: 'แดชบอร์ดตรวจสอบและวิเคราะห์ข้อมูลการดำเนินงาน',
-    icon: '📊',
-    badge: 'ANALYTICS',
-    url: 'https://wklangkr-byte.github.io/audit-dashboard/',
-    theme: 'purple',
-  },
-  {
-    name: 'MANPOWER',
-    desc: 'ระบบจัดการกำลังคน วางแผนและติดตามบุคลากร',
-    icon: '👥',
-    badge: 'HR',
-    url: 'https://wklangkr-byte.github.io/Manpower/',
-    theme: 'orange',
-  },
-  {
-    name: 'SHIFT SCHEDULE',
-    desc: 'ระบบจัดตารางกะการทำงาน วางแผนเวรประจำวัน',
-    icon: '📅',
-    badge: 'SCHEDULING',
-    url: 'https://wklangkr-byte.github.io/Shift-schedule/',
-    theme: 'teal',
-  },
-  {
-    name: 'SOA STOCK ONLINE',
-    desc: 'ระบบจัดการสต็อกสินค้าออนไลน์ ตรวจสอบเรียลไทม์',
-    icon: '📦',
-    badge: 'INVENTORY',
-    url: 'https://wklangkr-byte.github.io/SOA_STOCK_ONLINE/',
-    theme: 'sky',
-  },
-  {
-    name: 'SOA STOCK DATA',
-    desc: 'ฐานข้อมูลสต็อกสินค้า วิเคราะห์และรายงานข้อมูล',
-    icon: '🗃️',
-    badge: 'DATABASE',
-    url: 'https://wklangkr-byte.github.io/Soa_Stock_Data/',
-    theme: 'pink',
-  },
-  {
-    name: 'TEAM DIRECTORY',
-    desc: 'ทำเนียบทีมงาน ข้อมูลติดต่อและโครงสร้างองค์กร',
-    icon: '🗂️',
-    badge: 'DIRECTORY',
-    url: 'https://wklangkr-byte.github.io/Team_directory/',
-    theme: 'red',
-  },
+/* APPS */
+const APPS=[
+  {name:'E-BOOK',        desc:'ระบบหนังสืออิเล็กทรอนิกส์ เอกสารและคู่มือดิจิทัลสำหรับองค์กร',icon:'📚',badge:'LIBRARY',    url:'https://wklangkr-byte.github.io/E-BOOK/',           theme:'cyan'},
+  {name:'SOA CHECK LIST',desc:'ระบบตรวจสอบรายการ Checklist สำหรับงาน SOA มาตรฐานสูง',      icon:'✅',badge:'QC',         url:'https://wklangkr-byte.github.io/SOA_CHECK_LIST/',   theme:'green'},
+  {name:'SOA HOTEL',     desc:'ระบบจัดการโรงแรม บริการลูกค้าและจองห้องพัก',                icon:'🏨',badge:'HOSPITALITY',url:'https://wklangkr-byte.github.io/SOA-Hotel/',        theme:'gold'},
+  {name:'AUDIT DASHBOARD',desc:'แดชบอร์ดตรวจสอบและวิเคราะห์ข้อมูลการดำเนินงาน',           icon:'📊',badge:'ANALYTICS',  url:'https://wklangkr-byte.github.io/audit-dashboard/',  theme:'purple'},
+  {name:'MANPOWER',      desc:'ระบบจัดการกำลังคน วางแผนและติดตามบุคลากร',                  icon:'👥',badge:'HR',         url:'https://wklangkr-byte.github.io/Manpower/',         theme:'orange'},
+  {name:'SHIFT SCHEDULE',desc:'ระบบจัดตารางกะการทำงาน วางแผนเวรประจำวัน',                  icon:'📅',badge:'SCHEDULING', url:'https://wklangkr-byte.github.io/Shift-schedule/',   theme:'teal'},
+  {name:'SOA STOCK ONLINE',desc:'ระบบจัดการสต็อกสินค้าออนไลน์ ตรวจสอบเรียลไทม์',          icon:'📦',badge:'INVENTORY',  url:'https://wklangkr-byte.github.io/SOA_STOCK_ONLINE/', theme:'sky'},
+  {name:'SOA STOCK DATA', desc:'ฐานข้อมูลสต็อกสินค้า วิเคราะห์และรายงานข้อมูล',           icon:'🗃️',badge:'DATABASE',   url:'https://wklangkr-byte.github.io/Soa_Stock_Data/',   theme:'pink'},
+  {name:'TEAM DIRECTORY', desc:'ทำเนียบทีมงาน ข้อมูลติดต่อและโครงสร้างองค์กร',            icon:'🗂️',badge:'DIRECTORY',  url:'https://wklangkr-byte.github.io/Team_directory/',   theme:'red'},
 ];
 
-// ===== RENDER CARDS =====
-function renderApps() {
-  const grid = document.getElementById('app-grid');
-  grid.innerHTML = APPS.map((app, i) => `
-    <a href="${app.url}" target="_blank" rel="noopener noreferrer"
-       class="app-card theme-${app.theme}"
-       style="animation: fadeUp 0.5s ease ${0.05 * i + 0.4}s both">
-      <div class="app-card-top">
-        <div class="app-icon-wrap">${app.icon}</div>
-        <div class="app-badge">${app.badge}</div>
-      </div>
-      <div class="app-name">${app.name}</div>
-      <div class="app-desc">${app.desc}</div>
-      <div class="app-footer">
-        <div class="app-url">${app.url.replace('https://', '')}</div>
-        <div class="open-arrow">↗</div>
-      </div>
-    </a>
-  `).join('');
+function renderApps(){
+  document.getElementById('app-grid').innerHTML=APPS.map((a,i)=>`
+    <a href="${a.url}" target="_blank" rel="noopener noreferrer"
+       class="app-card theme-${a.theme}" style="animation:fadeUp .5s ease ${.05*i+.4}s both">
+      <div class="app-card-top"><div class="app-icon-wrap">${a.icon}</div><div class="app-badge">${a.badge}</div></div>
+      <div class="app-name">${a.name}</div>
+      <div class="app-desc">${a.desc}</div>
+      <div class="app-footer"><div class="app-url">${a.url.replace('https://','')}</div><div class="open-arrow">↗</div></div>
+    </a>`).join('');
 }
 
-// ===== LOGIN =====
-function doLogin() {
-  const u = document.getElementById('username').value.trim().toLowerCase();
-  const p = document.getElementById('password').value;
-  const err = document.getElementById('error-msg');
-
-  const match = USERS[u] && USERS[u].pass === p;
-  if (match) {
+/* LOGIN */
+function doLogin(){
+  const u=document.getElementById('username').value.trim().toLowerCase();
+  const p=document.getElementById('password').value;
+  const err=document.getElementById('error-msg');
+  if(USERS[u]&&USERS[u].pass===p){
     err.classList.remove('show');
-    const loader = document.getElementById('loader');
-    loader.classList.add('show');
-    setTimeout(() => {
-      loader.classList.remove('show');
-      document.getElementById('login-screen').style.display = 'none';
+    const ld=document.getElementById('loader');ld.classList.add('show');
+    setTimeout(()=>{
+      ld.classList.remove('show');
+      document.getElementById('login-screen').style.display='none';
       document.getElementById('app').classList.add('active');
-      const name = u.toUpperCase();
-      const role = USERS[u].role;
-      document.getElementById('welcome-name').textContent = name;
-      document.getElementById('user-display').textContent = name;
-      document.getElementById('user-avatar').textContent = name[0];
-      // role badge
-      const badge = document.getElementById('role-badge');
-      badge.textContent = role;
-      badge.className = 'role-badge ' + (role === 'ADMIN' ? 'role-admin' : 'role-user');
-      renderApps();
-      startClock();
-    }, 1600);
-  } else {
-    err.classList.remove('show');
-    void err.offsetWidth;
-    err.classList.add('show');
-  }
+      const name=u.toUpperCase(),role=USERS[u].role;
+      document.getElementById('welcome-name').textContent=name;
+      document.getElementById('user-display').textContent=name;
+      document.getElementById('user-avatar').textContent=name[0];
+      const b=document.getElementById('role-badge');
+      b.textContent=role;b.className='role-badge '+(role==='ADMIN'?'role-admin':'role-user');
+      renderApps();startClock();applyStored();
+    },1600);
+  }else{err.classList.remove('show');void err.offsetWidth;err.classList.add('show');}
 }
-
-function doLogout() {
+function doLogout(){
   document.getElementById('app').classList.remove('active');
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('username').value = '';
-  document.getElementById('password').value = '';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('username').value='';
+  document.getElementById('password').value='';
   document.getElementById('error-msg').classList.remove('show');
-  document.getElementById('role-badge').textContent = '';
+  document.getElementById('role-badge').textContent='';
+  document.getElementById('theme-panel').classList.remove('open');
 }
 
-// ===== CLOCK =====
-function startClock() {
-  const el = document.getElementById('clock');
-  const update = () => {
-    const now = new Date();
-    el.textContent = '// ' + now.toLocaleString('th-TH', {
-      weekday: 'long', year: 'numeric', month: 'long',
-      day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
-    });
-  };
-  update(); setInterval(update, 1000);
+/* CLOCK */
+function startClock(){
+  const el=document.getElementById('clock');
+  const up=()=>{el.textContent='// '+new Date().toLocaleString('th-TH',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});};
+  up();setInterval(up,1000);
 }
 
-// ENTER KEY
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
+/* THEME & FONT */
+const THEME_DEFAULT_FONT={
+  'cyber-dark':'sarabun','pure-white':'prompt',
+  'midnight-purple':'ibm','neon-green':'mono','rose-gold':'prompt'
+};
+const FONT_STACKS={
+  sarabun:"'Sarabun',sans-serif",
+  prompt:"'Prompt',sans-serif",
+  ibm:"'IBM Plex Sans Thai',sans-serif",
+  mono:"'Share Tech Mono',monospace"
+};
+
+function setTheme(id){
+  document.documentElement.setAttribute('data-theme',id);
+  document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
+  const sw=document.getElementById('sw-'+id);if(sw)sw.classList.add('active');
+  setFont(THEME_DEFAULT_FONT[id]||'sarabun',false);
+  try{localStorage.setItem('soa_theme',id);}catch(e){}
+}
+function setFont(id,save=true){
+  const stack=FONT_STACKS[id];if(!stack)return;
+  document.documentElement.style.setProperty('--font-body',stack);
+  document.body.style.fontFamily=stack;
+  document.querySelectorAll('.font-opt').forEach(el=>el.classList.remove('active'));
+  const fo=document.getElementById('fo-'+id);if(fo)fo.classList.add('active');
+  if(save){try{localStorage.setItem('soa_font',id);}catch(e){}}
+}
+function applyStored(){
+  try{
+    const t=localStorage.getItem('soa_theme')||'cyber-dark';
+    const f=localStorage.getItem('soa_font')||null;
+    setTheme(t);if(f)setFont(f);
+  }catch(e){setTheme('cyber-dark');}
+}
+function togglePanel(){document.getElementById('theme-panel').classList.toggle('open');}
+
+/* close on outside click */
+document.addEventListener('click',e=>{
+  const pnl=document.getElementById('theme-panel');
+  const btn=document.getElementById('theme-btn');
+  if(pnl&&btn&&!pnl.contains(e.target)&&!btn.contains(e.target))pnl.classList.remove('open');
 });
+
+applyStored();
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 </script>
 </body>
 </html>
